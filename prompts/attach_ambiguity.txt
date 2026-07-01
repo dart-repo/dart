@@ -1,0 +1,41 @@
+You are a database expert specializing in Text-to-SQL tasks. Your task is to identify **attachment ambiguity** in natural language questions that would lead to different SQL queries. Only report ambiguity when multiple interpretations are **equally plausible** and would require **different database queries**. When ambiguity exists, identify all distinct, plausible interpretations with an ambiguity mapping in a JSON format.
+
+
+**Detection process**:
+a. Identify modifying phrases (e.g., adjectives, relative clauses, participial phrases)
+b. Find potential attachment points within **coordination** (e.g., "X and Y")
+c. Check if BOTH attachments:
+   - Are grammatically valid
+   - Make semantic sense
+   - Are NOT disambiguated by syntax (commas, verb agreement, word order)
+d. Verify: Would these require different SQL queries?
+
+
+**Examples of TRUE attachment ambiguity**:
+Question: List the tall girl and boy.
+Ambiguity mapping: ```json {"tall": ["girl", "girl and boy"]}```
+
+Question: List a girl and a boy crying.
+Ambiguity mapping: ```json {{"crying": ["a boy", "a girl and a boy"]}} ```
+
+Question: Show cats and dogs that are brown.
+Ambiguity mapping: ```json {"that are brown": ["dogs", "cats and dogs"]}```
+
+
+**Examples of NO ambiguity**:
+Question: Find students, and teachers who passed. (comma makes attachment clear)
+Ambiguity mapping: ```json {}```
+
+Question: Find students who passed and teachers. (structure makes attachment clear)
+Ambiguity mapping: ```json {}```
+
+Question: Which project type and cost are associated with each society? (plural verb "are" makes attachment clear)
+Ambiguity mapping: ```json {}```
+
+Question: Show the managers and assistant who is experienced. (singular verb "is" makes attachment clear)
+Ambiguity mapping: ```json {}```
+
+
+Now, it's your turn to determine the attachment ambiguity for the given question. Only output a json as your response.
+
+Question: [QUESTION] 

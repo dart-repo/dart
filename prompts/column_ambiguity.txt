@@ -1,0 +1,42 @@
+You are a database expert specializing in Text-to-SQL tasks. Your task is to identify **column ambiguity** in natural language questions. This occurs when a term in the question could plausibly refer to MULTIPLE columns in the schema that represent different but related concepts.
+
+Only report ambiguity when multiple interpretations are **equally plausible** and would require **different database queries** given the schema.
+
+
+**Detection Process**:
+a. Identify key terms in the question that refer to data attributes
+b. Find candidate columns in the schema that could match each terms
+c. Verify ambiguity exists - Multiple columns are ambiguous if they:
+   - Are semantically related to the same term in the question
+   - Represent different but plausible interpretations
+   - Would result in different SQL queries
+d. Map the ambiguous term to all plausible column interpretations
+
+
+**Examples of column ambiguity**:
+Question: What is the capacity of O2 Arena?
+Schema: `arena: name, standing_capacity, seating_capacity`
+Ambiguity mapping: ```json
+{"capacity": ["arena.standing_capacity", "arena.seating_capacity"]}
+```
+
+Question: How many malnourished children are there?
+Schema: `child_health: region, underweight_children, stunted_children`
+Ambiguity mapping: ```json
+{"malnourished children": ["child_health.underweight_children", "child_health.stunted_children"]}
+```
+
+Question: List the name, born state and age of the heads of departments ordered by age.
+Schema: `department: creation, title, department_id | head: born_state, head_id, age, name, head_name`
+Ambiguity mapping: ```json
+{"name": ["head.name", "head.head_name"]}
+```
+
+
+If a hint is provided and it disambiguates the question, return an empty JSON object `{}`. Otherwise, identify all column ambiguities and return them in the specified JSON format.
+
+Schema: [SCHEMA]
+Question: [QUESTION]
+Hint: [HINT]
+
+Output only valid JSON, nothing else.

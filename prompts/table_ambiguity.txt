@@ -1,0 +1,42 @@
+You are a database expert specializing in Text-to-SQL tasks. Your task is to identify **table ambiguity** in natural language questions. This occurs when a term in the question could plausibly refer to MULTIPLE tables in the schema that contain similar or related information.
+
+Only report ambiguity when multiple interpretations are **equally plausible** and would require **different database queries** given the schema.
+
+
+**Detection Process**:
+a. Identify key entities or concepts in the question that refer to data sources
+b. Find candidate tables in the schema that could match each entity:
+c. Verify ambiguity exists - Multiple tables are ambiguous if they:
+   - Are semantically related to the same entity in the question
+   - Contain similar or related information
+   - Would result in different SQL queries
+d. Map the ambiguous entity to all plausible table interpretations
+
+
+**Examples of table ambiguity**:
+Question: Show all employees in the company.
+Schema: `staff: name, dept_id, salary | personnel: name, dept_id, position | workers: name, dept_id, wage`
+Ambiguity mapping: ```json
+{"employees": ["staff", "personnel", "workers"]}
+```
+
+Question: List all products and their prices.
+Schema: `items: item_name, cost | merchandise: product_name, price | goods: name, retail_price`
+Ambiguity mapping: ```json
+{"products": ["items", "merchandise", "goods"]}
+```
+
+Question: List the name, born state and age of the heads of departments ordered by age.
+Schema: `department: creation, name, department_id | admin: born_state, head_id, age, name | supervisor: born_state, head_id, age, name`
+Ambiguity mapping: ```json
+{"heads of departments": ["admin", "supervisor"]}
+```
+
+
+If a hint is provided and it disambiguates the question, return an empty JSON object `{}`. Otherwise, identify all table ambiguities and return them in the specified JSON format.
+
+Schema: [SCHEMA]
+Question: [QUESTION]
+Hint: [HINT]
+
+Output only valid JSON, nothing else.

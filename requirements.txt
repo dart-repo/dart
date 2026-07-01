@@ -1,0 +1,3 @@
+tqdm==4.67.3
+openai==2.21.0
+python-dotenv

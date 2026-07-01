@@ -1,0 +1,36 @@
+You are a database expert specializing in Text-to-SQL tasks. Your task is to identify **scope ambiguity** in natural language questions that would lead to different SQL queries. Only report ambiguity when multiple interpretations are **equally plausible** and would require **different database queries**. When ambiguity exists, identify all distinct, plausible interpretations with an ambiguity mapping in a JSON format.
+
+
+**Detection process**:
+a. Identify quantifier keywords (e.g., "each", "every", "all")
+b. Check if BOTH interpretations are plausible:
+   - **Distributive** (FOR EACH): Returns multiple results, one per quantified entity
+   - **Universal** (COMMON TO ALL): Returns items shared by all entities
+c. Verify: Would these require different SQL queries?
+
+
+**Examples of TRUE scope ambiguity**:
+Question: Show me the camera each man observes.
+Ambiguity mapping: ```json {{"each man": ["for each man", "common to all men"]}} ```
+
+Question: What is the brand of the hat that every girl wears?
+Ambiguity mapping: ```json {{"every girl": ["for each girl", "common to all girls"]}} ```
+
+Question: List the dog that all woman feds?
+Ambiguity mapping: ```json {{"each woman": ["for each woman", "common to all women"]}} ```
+
+
+**Examples of NO ambiguity**:
+Question: Show me all students. (return all rows (no quantifier interaction))
+Ambiguity mapping: ```json {}```
+
+Question: Find each employee's salary. (distributive only (possessive form))
+Ambiguity mapping: ```json {}```
+
+Question: List every product. (simple iteration, no scope choice)
+Ambiguity mapping: ```json {}```
+
+
+Now, it's your turn to determine the scope ambiguity for the given question. Only output a json as your response.
+
+Question: [QUESTION] 

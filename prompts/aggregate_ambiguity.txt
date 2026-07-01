@@ -1,0 +1,50 @@
+You are a database expert specializing in Text-to-SQL tasks. Your task is to identify **precomputed aggregate ambiguity** in natural language questions. This occurs when terms implying aggregation could refer to EITHER:
+    - A computation over raw data (e.g., MAX(budget), SUM(production), COUNT(*))
+    - A pre-aggregated column in the schema (e.g., max_budget, total_production, num_students)
+
+Only report ambiguity when multiple interpretations are **equally plausible** and would require **different database queries** given the schema.
+
+
+**Detection process**:
+a. Identify terms that imply aggregation in the question. Examples are:
+    - Explicit aggregates (e.g., total, sum, maximum/max, minimum/min, average/avg, mean, count, number of)
+    - Superlatives (e.g., best, worst, highest, lowest)
+    - Ranking/ordering (e.g., first, last, predominant)
+    - Quantifying adjectives (e.g., most [popular/common/frequent], least [expensive/common])
+b. For each term, check the schema for:
+    - Raw columns that could be aggregated to produce this meaning
+    - Pre-aggregated columns that store this computed value
+c. Verify BOTH interpretations:
+    - Are semantically equivalent (represent the same concept)
+    - Exist in the available schema
+    - Would produce different SQL queries
+d. Map the aggregate concept to both SQL representations
+
+
+**Examples of precomputed aggregate ambiguity**:
+Question: What are the maximum and minimum budget of the departments?
+Schema: `department: budget | department_budget: max_budget, min_budget`
+Ambiguity mapping: ```json
+{"maximum budget": ["MAX(department.budget)", "department_budget.max_budget"], "minimum budget": ["MIN(department.budget)", "department_budget.min_budget"]}
+```
+
+Question: What is the average and oldest age for each gender of student?
+Schema: `student: advisor, age, stuid, sex | student_age: max_age, stuid, avg_age, min_age, total_age, sex`
+Ambiguity mapping: ```json
+{"average age": ["AVG(student.age)", "student_age.avg_age"], "oldest age": ["MAX(student.age)", "student_age.max_age"]}
+```
+
+Question: Which disease affects the most countries?
+Schema: `disease_occurrence: country_id, disease | disease_stats: disease, total_countries, num_affected_countries`
+Ambiguity mapping: ```json
+{"most countries": ["COUNT(disease_occurrence.country_id)", "disease_stats.total_countries"]}
+```
+
+
+If a hint is provided and it disambiguates the question, return an empty JSON object `{}`. Otherwise, identify all precomputed aggregate ambiguities and return them in the specified JSON format.
+
+Schema: [SCHEMA]
+Question: [QUESTION]
+Hint: [HINT]
+
+Output only valid JSON, nothing else.

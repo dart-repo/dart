@@ -1,0 +1,45 @@
+You are a database expert specializing in Text-to-SQL tasks. Your task is to identify **join ambiguity** in natural language questions. This occurs when a term in the question could refer to columns that exist in multiple related tables, where the data can be accessed either:
+   1. **Directly** from one table without joins, or
+   2. **Through joins** with related tables
+
+Only report ambiguity when multiple interpretations are **equally plausible** and would require **different database queries** given the schema.
+
+
+**Detection Process**:
+a. Identify key terms in the question that refer to data attributes
+b. Find candidate columns across multiple tables that could match each term
+c. Check if these tables are connected by foreign key relationships
+d. Verify ambiguity exists - Columns are ambiguous if they:
+   - Match the same term in the question
+   - Exist in different but related tables
+   - Both interpretations are semantically valid
+   - Would require different SQL queries (direct access vs. join)
+e. Map the ambiguous term to all plausible column interpretations across tables
+
+**Examples of join ambiguity**:
+Question: List the title and description of all products.
+Schema: `product: product_id, title, price | product_details: product_id, title, description`
+Ambiguity mapping: ```json
+{"title": ["product.title", "product_details.title"]}
+```
+
+Question: List the venue and location for all concerts.
+Schema: `concert: concert_id, venue, location_id | location: location_id, venue, address`
+Ambiguity mapping: ```json
+{"venue": ["concert.venue", "location.venue"]}
+```
+
+Question: Display the email and phone number for all customers.
+Schema: customer: customer_id, email, phone | customer_contact: customer_id, email, phone
+Ambiguity mapping: ```json
+{"email": ["customer.email", "customer_contact.email"], "phone": ["customer.phone", "customer_contact.phone"]}
+```
+
+
+If a hint is provided and it disambiguates the question, return an empty JSON object `{}`. Otherwise, identify all join ambiguities and return them in the specified JSON format.
+
+Schema: [SCHEMA]
+Question: [QUESTION]
+Hint: [HINT]
+
+Output only valid JSON, nothing else.

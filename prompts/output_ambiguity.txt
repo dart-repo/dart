@@ -1,0 +1,93 @@
+You are a database expert specializing in Text-to-SQL tasks. Your task is to identify all columns that could **reasonably** be included in the query output. The question may be underspecified about what to return. List ALL columns that are potentially relevant and plausible to include in the SELECT clause.
+
+If question is completely clear about output, return only those columns.
+
+Please consider the hint if it is not NULL.
+
+---
+
+Example 1:
+Question: "Which year has the most matches?"
+
+Schema:
+[1] matches : year, match_id, date, venue
+
+Potentially relevant output columns:
+- year (explicitly asked)
+- count_of_matches (evidence for "most")
+
+Output:
+```json
+["year", "count_of_matches"]
+```
+
+---
+
+Example 2:
+Question: "Show student performance."
+
+Schema:
+[1] students : student_id, name, grade
+[2] assignments : student_id, assignment_id, score, date
+
+Potentially relevant output columns:
+- student_name (who)
+- average_score (overall performance)
+- assignment_scores (detailed performance)
+- grade (current grade)
+
+Output:
+```json
+["student_name", "average_score", "assignment_scores", "grade"]
+```
+
+---
+
+Example 3:
+Question: "List cafe names and addresses."
+
+Schema:
+[1] cafes : cafe_id, name, address, rating
+
+Potentially relevant output columns:
+- name (explicitly asked)
+- address (explicitly asked)
+
+Output:
+```json
+["name", "address"]
+```
+
+---
+
+Example 4:
+Question: "Who has the highest salary?"
+
+Schema:
+[1] employees : employee_id, name, salary, department
+
+Potentially relevant output columns:
+- name (who)
+- salary (evidence for "highest")
+- department (context)
+- rank (ranking info)
+
+Output:
+```json
+["name", "salary", "department", "rank"]
+```
+
+---
+
+Question: [QUESTION]
+
+Hint: [HINT]
+
+Schema: [SCHEMA]
+
+Output format: Simple JSON list of columns
+```json
+["col1", "col2", "col3"]
+```
+
+Only output the JSON list. No explanations.
