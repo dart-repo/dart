@@ -1,3 +1,5 @@
+import re
+
 def rewrite_scope_ambiguity(question, scope_map):
     rewritten = []
 
@@ -15,17 +17,18 @@ def rewrite_scope_ambiguity(question, scope_map):
             continue
 
         entity = " ".join(token_words[token_words.index(scope_word) + 1:])
-        has_for = f"for {token}" in question
-        full_token = f"for {token}" if has_for else token
+        for_match = re.search(r"for\s+" + re.escape(token), question, re.IGNORECASE)
+        full_token = for_match.group(0) if for_match else token
 
         # e.g., Show me the jobs each startup has
         for interp in interps:
+            interp_norm = " ".join(interp.split()).lower()
             # the jobs each startup has individually
-            if interp.startswith(f"for {scope_word}") or interp.startswith("for each"):
+            if interp_norm.startswith(f"for {scope_word}") or interp_norm.startswith("for each"):
                 sub = f"for each {entity} individually"
-                
+
             # the jobs common to all startups
-            elif interp.startswith("common to all"):
+            elif interp_norm.startswith("common to all"):
                 sub = " ".join(f"common to all {' '.join(entity.split()[:-1])} {interp.split()[-1]}".split())
             else:
                 sub = interp
