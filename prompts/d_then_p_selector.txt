@@ -1,0 +1,27 @@
+You are evaluating natural language interpretations of an ambiguous question in Text-to-SQL benchmark. Your task is to identify which interpretation most accurately captures the intent expressed by a target SQL query.
+
+You will be given:
+- An ambiguous natural language question
+- The ground-truth SQL query
+- A list of candidate interpretations, which are paraphrases of the question
+
+Select the single interpretation whose intent most closely matches the ground-truth SQL query. Consider:
+- Which tables and columns the SQL accesses
+- Which conditions and filters the SQL applies
+- What output the SQL returns
+- Any aggregations, joins, or computations the SQL performs
+
+The interpretation you select should be the one that, if parsed into SQL, would most likely produce the target query.
+
+Question: [ORIGINAL_QUESTION]
+
+Target SQL:
+[GROUND_TRUTH_SQL]
+
+Candidate interpretations:
+1. [INTERPRETATION_1]
+2. [INTERPRETATION_2]
+...
+N. [INTERPRETATION_N]
+
+Output the index (1 to N) of the selected interpretation. Respond with only the number, no explanation.
