@@ -25,7 +25,7 @@ from utils.evaluate_utils import (
 def run_eval_clambsql(input_path):
     data = json.load(open(input_path))
 
-    for item in data:
+    for item in tqdm(data):
         index = item["index"]
         ambig_type = item["ambig_type"]
         db_file = item["db_file"]
@@ -216,12 +216,18 @@ def run_eval_clambsql(input_path):
 def run_eval_ambrosia(input_path):
     data = json.load(open(input_path))
 
-    for item in data:
+    for item in tqdm(data):
         index = item["index"]
         ambig_type = item["ambig_type"]
-        db_file = item["db_file"]
+        db_file = item.get("db_file")
+        if not db_file or not os.path.exists(db_file):
+            # CLEAR results store a db_file relative to another root; rebuild it from db_id
+            # (e.g. "Hospitality/attachment_1tab_val_event_space"), as DART/D-then-P paths look.
+            db_id = item["db_id"]
+            db_name = db_id.split("/")[-1]
+            db_file = f"./dataset/ambrosia/data/{ambig_type}/{db_id}/{db_name}.sqlite"
         sqls = item.get("prediction") or item.get("predict_sql")
-        
+
         if sqls is None:
             print(f"No prediction found for index {item['index']}")
             continue
@@ -270,7 +276,7 @@ def run_eval_ambiqt(args):
     num_alts = 2 # query 1 and query 2 for each question
     
     results = []
-    for item in data:
+    for item in tqdm(data):
         index = item["index"]
         ambig_type = item.get("ambig_type") or item.get("ambiqt_type")
         db_id = item["db_id"]
@@ -546,6 +552,10 @@ def run_eval_arcwise_plat_sql(input_path):
     for item in tqdm(data):
         index = item["index"]
         db_file = item.get("db_file")
+        if db_file is None:
+            # CLEAR results store only db_id; build the same path DART/D-then-P records use.
+            db_id = item["db_id"]
+            db_file = f"./dataset/arcwise_plat_sql/dev_databases/{db_id}/{db_id}.sqlite"
         sqls = item["prediction"]
         gold_sqls = item.get("ambiguous_queries") or [item.get("query")]
 
@@ -574,12 +584,13 @@ def run_eval_arcwise_plat_sql(input_path):
     for _, line in sorted(results, key=lambda x: int(x[0])):
         print(line)
  
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--dataset", type=str, required=True)
     parser.add_argument("--input_path", type=str, required=True)
-    parser.add_argument("--db_dir", type=str, help="root directory for AmbiQT database")
+    parser.add_argument("--db_dir", type=str, default="./dataset/ambiqt/db-content/database", help="root directory for AmbiQT databases (<db_dir>/<db_id>/<db_id>.sqlite)")
     
     args = parser.parse_args()
     
